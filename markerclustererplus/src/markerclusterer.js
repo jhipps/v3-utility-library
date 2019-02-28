@@ -568,8 +568,14 @@ Cluster.prototype.updateIcon_ = function () {
 
   var numStyles = this.markerClusterer_.getStyles().length;
   var sums = this.markerClusterer_.getCalculator()(this.markers_, numStyles);
+  var icon_info = this.iconFactory(this.markers_, { length: mCount, minClusterSize: this.minClusterSize, maxClusterSize: this.maxClusterSize }); // Inject drawer into options.
   this.clusterIcon_.setCenter(this.center_);
   this.clusterIcon_.useStyle(sums);
+  this.clusterIcon_.url_ = icon_info.url;// Do the stuff here.
+  this.clusterIcon_.width_ = icon_info.width; // return this
+  this.clusterIcon_.height_ = icon_info.height; // and this
+  this.clusterIcon_.anchorIcon_ = [icon_info.height / 2, icon_info.height / 2];
+  this.clusterIcon_.sums_.title2 =  icon_info.title; // getStatusCaption(orderedPieGroups) // and this
   this.clusterIcon_.show();
 };
 
@@ -693,6 +699,7 @@ function MarkerClusterer(map, opt_markers, opt_options) {
   this.listeners_ = [];
   this.activeMap_ = null;
   this.ready_ = false;
+  this.iconFactory_ = opt_options.iconFactory;
 
   this.gridSize_ = opt_options.gridSize || 60;
   this.minClusterSize_ = opt_options.minimumClusterSize || 2;
@@ -868,7 +875,13 @@ MarkerClusterer.prototype.getGridSize = function () {
 MarkerClusterer.prototype.setGridSize = function (gridSize) {
   this.gridSize_ = gridSize;
 };
+MarkerClusterer.prototype.getIconFactory = function () {
+  return this.iconFactory_;
+};
 
+MarkerClusterer.prototype.setIconFactory = function (iconFactory) {
+  return this.iconFactory_ = iconFactory;
+};
 
 /**
  * Returns the value of the <code>minimumClusterSize</code> property.
