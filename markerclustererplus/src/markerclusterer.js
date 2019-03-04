@@ -374,6 +374,7 @@ function Cluster(mc) {
   this.map_ = mc.getMap();
   this.gridSize_ = mc.getGridSize();
   this.minClusterSize_ = mc.getMinimumClusterSize();
+  this.iconFactory = mc.getIconFactory();
   this.averageCenter_ = mc.getAverageCenter();
   this.markers_ = [];
   this.center_ = null;
@@ -568,14 +569,19 @@ Cluster.prototype.updateIcon_ = function () {
 
   var numStyles = this.markerClusterer_.getStyles().length;
   var sums = this.markerClusterer_.getCalculator()(this.markers_, numStyles);
-  var icon_info = this.iconFactory(this.markers_, { length: mCount, minClusterSize: this.minClusterSize, maxClusterSize: this.maxClusterSize }); // Inject drawer into options.
   this.clusterIcon_.setCenter(this.center_);
   this.clusterIcon_.useStyle(sums);
-  this.clusterIcon_.url_ = icon_info.url;// Do the stuff here.
-  this.clusterIcon_.width_ = icon_info.width; // return this
-  this.clusterIcon_.height_ = icon_info.height; // and this
-  this.clusterIcon_.anchorIcon_ = [icon_info.height / 2, icon_info.height / 2];
-  this.clusterIcon_.sums_.title2 =  icon_info.title; // getStatusCaption(orderedPieGroups) // and this
+  if (typeof this.iconFactory === 'function'){
+      var editableKeys = ['url_','width_','height_','anchorIcon_','textColor_','textSize_','fontFamily_',
+          'fontWeight_','fontStyle_','textDecoration_','text','title'];
+      var icon_info = this.iconFactory(this.markers_, { length: mCount, minClusterSize: this.minClusterSize, maxClusterSize: this.maxClusterSize }); // Inject drawer into options.
+      var icon_info_keys = Object.keys(icon_info);
+      for (i=0; i<icon_info_keys.length; i++) {
+        if (editableKeys.indexOf(icon_info_keys[i]) !== -1){
+          this.clusterIcon_[icon_info_keys[i]] = icon_info[icon_info_keys[i]];
+        }
+      }
+  }
   this.clusterIcon_.show();
 };
 
@@ -1670,5 +1676,5 @@ MarkerClusterer.IMAGE_EXTENSION = "png";
 MarkerClusterer.IMAGE_SIZES = [53, 56, 66, 78, 90];
 
 if (typeof module == 'object') {
-  module.exports = MarkerClusterer;
+  module.exports = {MarkerClusterer:MarkerClusterer,Cluster:Cluster};
 }
